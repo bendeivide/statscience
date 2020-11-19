@@ -66,3 +66,13 @@ Sys.setenv
 # Configurar o TRAVIS
 https://sahirbhatnagar.com/blog/2020/03/03/creating-a-website-for-your-r-package/
 
+
+# Antes de iniciar a construcao da website do
+#  pacote
+require(devtools)
+use_readme_rmd()
+use_news_md()
+use_vignette("test")
+##
+require(pkgdown)
+use_github_links(overwrite = TRUE)
