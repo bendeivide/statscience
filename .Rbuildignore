@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^comandos_importantes\.R$
+^transitorio\.R$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

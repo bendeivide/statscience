@@ -10,3 +10,4 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 URL: http://github.com/bendeivide/statscience
+RoxygenNote: 7.1.1

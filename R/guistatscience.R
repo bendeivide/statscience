@@ -109,7 +109,8 @@ guistatscience <- function(gui = TRUE) {
     tkpack.propagate(topwinstat, FALSE)
 
     # Initial screen
-    tkpack(telainicial <- tklabel(parent = topwinstat, image = "::image::logostatscience"),
+    tkpack(quadroinicial <- tkframe(topwinstat), expand = TRUE, fill = "both")
+    tkpack(telainicial <- tklabel(parent = quadroinicial, image = "::image::logostatscience"),
            expand = TRUE, fill = "both")
 
 
@@ -242,8 +243,15 @@ guistatscience <- function(gui = TRUE) {
     tkadd(menu_bar, 'cascade', label = gettext('File', domain = "R-MCP"), menu = file_menu)
     tkadd(file_menu, 'command', label = gettext('Open file (.txt or .csv)...', domain = "R-MCP"),
           accelerator = 'Ctrl+O', command = openfile, image = "::image::open", compound = "left")
-
-
+    restartscreen <- function(){
+      aux <- as.character(tkwinfo("children", quadroinicial))
+      sapply(aux, function(W) tcl("destroy", W))
+      #tkdestroy(telainicial)
+      tkpack(telainicial <- tklabel(parent = quadroinicial, image = "::image::logostatscience"),
+             expand = TRUE, fill = "both")
+    }
+    tkadd(file_menu, 'command', label = gettext('Restart Analysis', domain = "R-MCP"),
+          accelerator = 'Ctrl+R', command = restartscreen)
     ## Edit menu
     # This variable is important in the event of the "bentry" button
     dat2 <- NULL # This variable is internal, not exported to the console
@@ -256,8 +264,8 @@ guistatscience <- function(gui = TRUE) {
       }
     }
     edit_menu <- tkmenu(menu_bar, tearoff = FALSE)
-    tkadd(menu_bar, "cascade", label = gettext("Edit", domain = "R-MCP"), menu = edit_menu)
-    tkadd(edit_menu, "command", label = gettext("Data set...", domain = "R-MCP"),
+    tkadd(menu_bar, "cascade", label = gettext("Edit", domain = "R-statscience"), menu = edit_menu)
+    tkadd(edit_menu, "command", label = gettext("Data set...", domain = "R-statscience"),
           accelerator = "Ctrl+E", command = fedit,
           image = "::image::edit", compound = "left")
 
@@ -268,6 +276,69 @@ guistatscience <- function(gui = TRUE) {
     tkbind(topwinstat, "<Control-e>", fedit)
     tkbind(topwinstat, "<Control-Shift-H>", chosdir)
     tkbind(topwinstat, "<Control-Shift-h>", chosdir)
+    tkbind(topwinstat, "<Control-R>", restartscreen)
+    tkbind(topwinstat, "<Control-r>", restartscreen)
+
+    # Analysis menu
+    expdes <- function(...){
+      aux <- as.character(tkwinfo("children", quadroinicial))
+      sapply(aux, function(W) tcl("destroy", W))
+      #tkdestroy(telainicial)
+      telainicial <- ttknotebook(quadroinicial)
+      ##
+      paned1 <- ttkpanedwindow(telainicial, orient = "horizontal", style = "Toolbar.TPanedwindow")
+      paned2 <- ttkpanedwindow(telainicial, orient = "horizontal", style = "Toolbar.TPanedwindow")
+      paned3 <- ttkpanedwindow(telainicial, orient = "horizontal", style = "Toolbar.TPanedwindow")
+      ##
+      ##############
+      # Child groups
+      ##############
+      #group1 <- NULL
+      wid2 <- 400
+      group1input <- ttkpanedwindow(paned1, orient = "vertical", width =  wid2, style = "Toolbar.TPanedwindow")
+      tkadd(paned1, group1input)
+
+      group2input <- ttkpanedwindow(paned1, orient = "vertical", width = wid - wid2, style = "Toolbar.TPanedwindow")
+      tkadd(paned1, group2input)
+      ##
+      tkadd(telainicial, paned1, text = "Input")
+      tkadd(telainicial, paned2, text = "Graphics")
+      tkadd(telainicial, paned3, text = "Output")
+      tkpack(telainicial, fill = "both", expand = TRUE)
+
+      # Design of Exepriments
+      #----------------------
+      # Aba Input
+      tkpack(infodados <- ttklabelframe(group1input,
+                                        text = gettext("Configuration of the data",
+                                                       domain = "R-statscience")),
+             fill = "both", expand = TRUE)
+
+      tkpack(info1 <- tkframe(infodados), side = "left", anchor = "nw")
+
+      tkpack(boxbalanced <- tkcheckbutton(info1), side = "left", anchor = "nw")
+      tkpack(tklabel(info1, text = gettext("Balanced", domain = "R-statscience" )),
+             side = "left", anchor = "nw", padx = "0.5m")
+
+      tkpack(boxreplicated <- tkcheckbutton(info1), side = "left", anchor = "nw")
+      tkpack(tklabel(info1, text = gettext("Replicated", domain = "R-statscience" )),
+             side = "left", anchor = "nw", padx = "0.5m")
+
+      tkpack(infoexp <- ttklabelframe(group1input,
+                                      text = gettext("Configuration of the Experiment",
+                                                     domain = "R-statscience")),
+             fill = "both", expand = TRUE)
+
+      tkpack(treatstr <- ttklabelframe(group1input,
+                                       text = gettext("Treatment Structures",
+                                                      domain = "R-statscience")),
+             fill = "both", expand = TRUE)
+
+    }
+    analysis_menu <- tkmenu(menu_bar, tearoff = FALSE)
+    tkadd(menu_bar, "cascade", label = gettext("Analysis", domain = "R-statscience"), menu = analysis_menu)
+    tkadd(analysis_menu, "command", label = gettext("Experimental Designs", domain = "R-statscience"),
+          accelerator = "Ctrl+A", command = expdes)
 
 
 
