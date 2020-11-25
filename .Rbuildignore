@@ -1,8 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^comandos_importantes\.R$
 ^transitorio\.R$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^README\.Rmd$
+^R/testing_widgets$
+^R/transitorio$
+^desenho_interface$
+^logo$

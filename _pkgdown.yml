@@ -1,2 +1,6 @@
 title: statscience
 url: http://bendeivide.github.io/statscience
+template:
+  params:
+    bootswatch: cerulean
+    ganalytics: UA-183980834-2

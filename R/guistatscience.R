@@ -23,6 +23,12 @@ guistatscience <- function(gui = TRUE) {
   #
   # # Ingles
   # Sys.setenv(LANG = "en")
+  # Environment of package
+  envss <- new.env(parent = base::emptyenv())
+  assign("dat", NULL, envir = envss)
+
+
+
   if (gui == TRUE) {
     # Insert images
     tkimage.create("photo", "::image::logostatscience", file = system.file("etc", "statscience.gif", package = "statscience"))
@@ -192,25 +198,7 @@ guistatscience <- function(gui = TRUE) {
         start_dir <- tclvalue(filetemp)
         if (file.exists(start_dir)) {
           tkwm.withdraw(confdata)
-          dat <- NULL
-          dat2 <- NULL
-          dat2 <<- dat <<- f.read(start_dir)
-          tcl(search_results, "delete", "1.0", "end")
-          tkinsert(search_results, "end",
-                   paste(gettext("The variables in the file:", domain = "R-statscience"),
-                         "===========================",
-                         as.character(start_dir),
-                         "===========================",
-                         sep = "\n"))
-          tkinsert(search_results, "end", "\n")
-          tkinsert(search_results, "end",
-                   paste(paste(names(f.read(start_dir)), collapse = "\n", sep = "\n"),
-                         sep = "\n"), "variablesTag")
-          tkinsert(search_results, "end", "\n")
-          tkinsert(search_results, "end",
-                   paste("===========================",
-                         gettext("R object created: 'dat'", domain = "R-statscience"), sep = "\n"))
-          tkmessageBox(message = gettext("Check the data has been loaded correctly. To do this, use the 'Edit/View' button or the 'Output' frame.", domain = "R-satscience"))
+          envss$dat <- f.read(start_dir)
         }
         if (file.exists(start_dir) == FALSE) {
           tkwm.withdraw(confdata)
@@ -222,6 +210,8 @@ guistatscience <- function(gui = TRUE) {
       tkbind(confdata, "<Escape>", function(){
         tkwm.withdraw(confdata)
       })
+
+
     }
     # Menu
     menu_bar <- tkmenu(topwinstat)
@@ -254,13 +244,12 @@ guistatscience <- function(gui = TRUE) {
           accelerator = 'Ctrl+R', command = restartscreen)
     ## Edit menu
     # This variable is important in the event of the "bentry" button
-    dat2 <- NULL # This variable is internal, not exported to the console
+
     fedit <- function(...) {
-      if (is.null(dat2)) {
+      if (is.null(envss$dat)) {
         tkmessageBox(message = gettext("No data set has been entered!", domain = "R-MCP"))
       } else{
-        dat <- NULL
-        dat2 <<- dat <- dat <<- edit(dat2)
+        envss$dat <- edit(envss$dat)
       }
     }
     edit_menu <- tkmenu(menu_bar, tearoff = FALSE)
@@ -309,30 +298,73 @@ guistatscience <- function(gui = TRUE) {
       # Design of Exepriments
       #----------------------
       # Aba Input
-      tkpack(infodados <- ttklabelframe(group1input,
-                                        text = gettext("Configuration of the data",
-                                                       domain = "R-statscience")),
-             fill = "both", expand = TRUE)
+      # tkpack(infodados <- ttklabelframe(group1input,
+      #                                   text = gettext("Configuration of the data",
+      #                                                  domain = "R-statscience")),
+      #        fill = "both", expand = TRUE)
 
-      tkpack(info1 <- tkframe(infodados), side = "left", anchor = "nw")
+      # tkpack(info1 <- tkframe(infodados), side = "left", anchor = "nw")
+      #
+      # tkpack(boxbalanced <- tkcheckbutton(info1), side = "left", anchor = "nw")
+      # tkpack(tklabel(info1, text = gettext("Balanced", domain = "R-statscience" )),
+      #        side = "left", anchor = "nw", padx = "0.5m")
+      #
+      # tkpack(boxreplicated <- tkcheckbutton(info1), side = "left", anchor = "nw")
+      # tkpack(tklabel(info1, text = gettext("Replicated", domain = "R-statscience" )),
+      #        side = "left", anchor = "nw", padx = "0.5m")
 
-      tkpack(boxbalanced <- tkcheckbutton(info1), side = "left", anchor = "nw")
-      tkpack(tklabel(info1, text = gettext("Balanced", domain = "R-statscience" )),
-             side = "left", anchor = "nw", padx = "0.5m")
+      # tkpack(infoexp <- ttklabelframe(group1input,
+      #                                 text = gettext("Configuration of the Experiment",
+      #                                                domain = "R-statscience")),
+      #        fill = "both", expand = TRUE)
+      #
+      # tkpack(treatstr <- ttklabelframe(group1input,
+      #                                  text = gettext("Treatment Structures",
+      #                                                 domain = "R-statscience")),
+      #        fill = "both", expand = TRUE)
 
-      tkpack(boxreplicated <- tkcheckbutton(info1), side = "left", anchor = "nw")
-      tkpack(tklabel(info1, text = gettext("Replicated", domain = "R-statscience" )),
-             side = "left", anchor = "nw", padx = "0.5m")
+      tkpack(vardados <- ttklabelframe(group1input,
+                                           text = gettext("Data",
+                                                          domain = "R-statscience")),
+                fill = "x", expand = TRUE, anchor = "n", side = "top")
 
-      tkpack(infoexp <- ttklabelframe(group1input,
-                                      text = gettext("Configuration of the Experiment",
-                                                     domain = "R-statscience")),
-             fill = "both", expand = TRUE)
+       treeview <- ttktreeview(vardados,
+                               columns = 1 , # coluna identifica se 1 e 0 nao
+                               show = "headings" ,
+                               height = 10)
+       addScrollbars(vardados, treeview)
 
-      tkpack(treatstr <- ttklabelframe(group1input,
-                                       text = gettext("Treatment Structures",
-                                                      domain = "R-statscience")),
-             fill = "both", expand = TRUE)
+       # Insert variables of data
+       if (is.null(envss$dat)) {
+         variable <- "Not variables"
+       } else{
+         variable <- names(envss$dat)
+       }
+       shade <- c("none", "gray")
+       ##
+       for (i in seq_along(variable)) {
+         ID <- tkinsert(treeview, "", "end",
+                        values = as.tclObj(variable[i]),
+                        tag = shade[i %% 2]) # nenhum ou cinza
+       }
+       tktag.configure(treeview, "gray", background = "gray95")
+
+       # Cabecalho da coluna
+       tcl(treeview, "heading", 1, text = "Variables of data", anchor = "center")
+
+       # Button Calculate
+       ##################
+       tkpack(calculate_button <- ttkbutton(text = gettext("Calculate",
+                                                           domain = "R-MCPtests"),
+                                            parent = group1input),
+              side = "bottom",
+              anchor = "s",
+              expand = TRUE,
+              fill = "x"
+       )
+       calcular <- function(...){
+         anava <- aov()
+       }
 
     }
     analysis_menu <- tkmenu(menu_bar, tearoff = FALSE)
