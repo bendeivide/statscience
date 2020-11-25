@@ -16,3 +16,5 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 BugReports: https://github.com/bendeivide/statscience/issues
+Depends: 
+    R (>= 2.10)

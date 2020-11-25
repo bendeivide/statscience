@@ -363,8 +363,40 @@ guistatscience <- function(gui = TRUE) {
               fill = "x"
        )
        calcular <- function(...){
-         anava <- aov()
+         anava <- aov(eval(parse(text = tclvalue(var_model))), data = envss$dat)
+         ##
+         tkpack(tkrplot::tkrplot(areaplot, function(...) {
+            par(mfrow = c(2,2))
+            return(plot(anava))
+          }
+         ))
+         resultado <- capture.output(summary(anava))
+         tkinsert(areanalysis, "end", paste(resultado, collapse = "\n"))
        }
+       tkbind(calculate_button, "<ButtonRelease>", calcular)
+
+       tkpack(model <- ttklabelframe(group1input,
+                                        text = gettext("Insert Model",
+                                                       domain = "R-statscience")),
+              fill = "x", expand = TRUE, anchor = "n", side = "top")
+       tkpack(tklabel(model, text = "Response Variable ~ Preditors"), side = "top")
+       var_model <- tclVar("")
+       tkpack(tkentry(parent = model,
+                      textvariable = var_model, width = 50), side = "top")
+
+       tkpack(graphs <- ttklabelframe(group2input,
+                                      text = gettext("Plot",
+                                                     domain = "R-statscience")),
+              fill = "both", expand = TRUE, anchor = "n", side = "top")
+       tkpack(areaplot <- tkframe(graphs), fill = "both", expand = TRUE)
+
+       tkpack(analysis <- ttklabelframe(group2input,
+                                        text = gettext("Analysis",
+                                                       domain = "R-statscience")),
+              fill = "both", expand = TRUE, anchor = "s", side = "bottom")
+       tkpack(areanalysis <- tktext(analysis,  height = 10), fill = "both", expand = TRUE)
+
+
 
     }
     analysis_menu <- tkmenu(menu_bar, tearoff = FALSE)
